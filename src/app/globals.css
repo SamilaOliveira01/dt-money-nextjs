@@ -11,7 +11,15 @@
   --income-value: #33CC95;
   --outcome-value: #E52E4D;
   --button: #6933FF;
+  --background: #F0F2F5;
 
+}
+
+/* globals.css */
+body {
+  @apply bg-background; /* ou qualquer outra cor desejada */
+  margin: 0; /* Remove a margem padrão */
+  padding: 0; /* Remove o preenchimento padrão */
 }
 
 /*:root {

@@ -20,6 +20,8 @@ const config: Config = {
         "table-header": "var(--table-header)",
         "income-value": "var(--income-value)",        
         "button" : "var(--button)",
+        "background" : "var(--background)",
+        "outcome-value" : "var(--outcome-value)"
       },
     },
   },
