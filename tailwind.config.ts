@@ -21,7 +21,9 @@ const config: Config = {
         "income-value": "var(--income-value)",        
         "button" : "var(--button)",
         "background" : "var(--background)",
-        "outcome-value" : "var(--outcome-value)"
+        "outcome-value" : "var(--outcome-value)",
+        "fields": "var(--fields)",
+        "submit": "var(--submit)"
       },
     },
   },
