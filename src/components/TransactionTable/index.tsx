@@ -1,18 +1,10 @@
 import React from 'react';
-
-export interface TransactionTemplate {
-  id: number;
-  title: string;
-  amount: number;
-  category: string;
-  date: string;
-  type: 'entrada' | 'saida'; 
-}
+import { TransactionTemplate } from '../../pages/api/transactions';
 
 interface TransactionTableProps {
   transactions: TransactionTemplate[];
   onEdit: (transaction: TransactionTemplate) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onEdit, onDelete }) => {
@@ -34,12 +26,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onEdi
               <td className="px-8 py-4">{transaction.title}</td>
               <td className={`px-8 py-4 ${transaction.type === 'entrada' ? 'text-income-value' : 'text-outcome-value'}`}>
                 {transaction.type === 'saida' ? 
-                  `-${transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` :
-                  transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                  `-${transaction.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` :
+                  transaction.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                 }
               </td>
               <td className="px-8 py-4 text-gray-400">{transaction.category}</td>
-              <td className="px-8 py-4 text-gray-400">{transaction.date}</td>
+              <td className="px-8 py-4 text-gray-400">
+                {new Date(transaction.date).toLocaleDateString('pt-BR')}
+              </td>
               <td className="px-8 py-4">
                 <button
                   onClick={() => onEdit(transaction)}

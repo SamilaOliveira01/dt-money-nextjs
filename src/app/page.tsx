@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Container, { ContainerTemplate } from "@/components/Containers";
-import { Header } from "@/components/Header";
-import TransactionTable from "@/components/TransactionTable";
-import { TransactionTemplate } from '@/components/TransactionTable';
+import Container, { ContainerTemplate } from '@/components/Containers';
+import { Header } from '@/components/Header';
+import TransactionTable from '@/components/TransactionTable';
+import { TransactionTemplate } from '@/pages/api/transactions';
 import Modal from '@/components/Modal';
+import ConfirmationModal from '@/components/ConfirmationModal';
 import { useTransaction } from '@/hooks/useTransaction';
 
 export default function Home() {
@@ -18,9 +19,11 @@ export default function Home() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState<TransactionTemplate | null>(null);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTransactions(); // Fetch transactions on component mount
+    fetchTransactions();
   }, [fetchTransactions]);
 
   const handleOpenModal = (transaction?: TransactionTemplate) => {
@@ -33,23 +36,45 @@ export default function Home() {
     setCurrentTransaction(null);
   };
 
-  const handleAddTransaction = (transaction: TransactionTemplate) => {
-    if (currentTransaction) {
-      updateTransaction(transaction);
-    } else {
-      addTransaction(transaction);
+  const handleAddTransaction = (transaction: TransactionTemplate | null) => {
+    if (transaction) {
+      if (currentTransaction) {
+        updateTransaction(transaction)
+          .then(() => fetchTransactions());
+      } else {
+        addTransaction(transaction)
+          .then(() => fetchTransactions());
+      }
     }
     handleCloseModal();
+  };
+
+  const handleDeleteTransaction = (id: string) => {
+    setConfirmDeleteId(id);
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (confirmDeleteId) {
+      deleteTransaction(confirmDeleteId)
+        .then(() => fetchTransactions())
+        .finally(() => setIsConfirmationModalOpen(false));
+    }
+  };
+
+  const handleCloseConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+    setConfirmDeleteId(null);
   };
 
   const calculateTotals = () => {
     const income = transactions
       .filter(t => t.type === 'entrada')
-      .reduce((acc, t) => acc + t.amount, 0);
+      .reduce((acc, t) => acc + t.price, 0);
 
     const outcome = transactions
       .filter(t => t.type === 'saida')
-      .reduce((acc, t) => acc + t.amount, 0);
+      .reduce((acc, t) => acc + t.price, 0);
 
     const total = income - outcome;
 
@@ -99,14 +124,20 @@ export default function Home() {
       </div>
       <TransactionTable
         transactions={transactions}
-        onEdit={handleOpenModal}
-        onDelete={deleteTransaction}
+        onEdit={(transaction) => handleOpenModal(transaction)}
+        onDelete={handleDeleteTransaction}
       />
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleAddTransaction}
         initialData={currentTransaction}
+      />
+      <ConfirmationModal
+        isOpen={isConfirmationModalOpen}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={handleConfirmDelete}
+        message="Tem certeza de que deseja excluir esta transação?"
       />
     </>
   );

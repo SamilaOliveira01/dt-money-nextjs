@@ -1,24 +1,23 @@
-// src/components/Modal/index.tsx
 import React, { useState, useEffect } from 'react';
-import { TransactionTemplate } from '../TransactionTable';
+import { TransactionTemplate } from '../../pages/api/transactions';
 
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (transaction: TransactionTemplate) => void;
+  onSubmit: (transaction: TransactionTemplate | null) => void;
   initialData?: TransactionTemplate | null;
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [title, setTitle] = useState(initialData?.title || '');
-  const [amount, setAmount] = useState<number | ''>(initialData?.amount || '');
+  const [price, setPrice] = useState<number | ''>(initialData?.price || '');
   const [category, setCategory] = useState(initialData?.category || '');
   const [selected, setSelected] = useState<'entrada' | 'saida' | null>(initialData?.type || null);
 
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
-      setAmount(initialData.amount);
+      setPrice(initialData.price);
       setCategory(initialData.category);
       setSelected(initialData.type);
     }
@@ -28,21 +27,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, initialData })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title || amount === '' || !category || !selected) return;
-
+  
+    if (!title || price === '' || !category || !selected) return;
+  
     const newTransaction: TransactionTemplate = {
-      id: initialData?.id || new Date().getTime(),
+      id: initialData?.id || new Date().getTime().toString(),
       title,
-      amount,
+      price,
       category,
       date: new Date().toLocaleDateString('pt-BR'),
       type: selected
     };
-
+  
     onSubmit(newTransaction);
     setTitle('');
-    setAmount('');
+    setPrice('');
     setCategory('');
     setSelected(null);
     onClose();
@@ -71,15 +70,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, initialData })
               </div>
               <div className="mb-4">
                 <input
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
                   className="w-full h-15 bg-fields py-4 appearance-none border border-[#D7D7D7] rounded-md px-4 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                   type="number"
                   placeholder="Preço"
                 />
               </div>
               <div className="mb-4 flex gap-2">
-                <div className={`flex-1 flex justify-center items-center border-2 border-gray-200 rounded-md h-16`}>
+                <div className="flex-1 flex justify-center items-center border-2 border-gray-200 rounded-md h-16">
                   <button
                     type="button"
                     className={`flex items-center justify-center w-full text-title font-medium rounded-sm px-4 py-2 h-full ${selected === 'entrada' ? 'bg-[#12A454] text-white' : 'bg-background'}`}
@@ -89,7 +88,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, initialData })
                     Entrada
                   </button>
                 </div>
-                <div className={`flex-1 flex justify-center items-center border-2 border-gray-200 rounded-md h-16`}>
+                <div className="flex-1 flex justify-center items-center border-2 border-gray-200 rounded-md h-16">
                   <button
                     type="button"
                     className={`flex items-center justify-center w-full text-title font-medium rounded-sm px-4 py-2 h-full ${selected === 'saida' ? 'bg-[#FF4C4C] text-white' : 'bg-background'}`}

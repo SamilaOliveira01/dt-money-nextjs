@@ -1,40 +1,68 @@
 import { useState } from 'react';
-import { TransactionTemplate } from '@/components/TransactionTable';
+import axios from 'axios';
+import { TransactionTemplate } from '@/pages/api/transactions';
+
+const API_BASE_URL = 'http://localhost:3333/api/transaction';
 
 export function useTransaction() {
-  const [transactions, setTransactions] = useState<TransactionTemplate[]>(() => {
-    // Inicializa o estado com dados do armazenamento local, se disponível
-    return JSON.parse(localStorage.getItem('transactions') || '[]');
-  });
+  const [transactions, setTransactions] = useState<TransactionTemplate[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const saveToLocalStorage = (data: TransactionTemplate[]) => {
-    localStorage.setItem('transactions', JSON.stringify(data));
+  const fetchTransactions = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_BASE_URL);
+      setTransactions(response.data);
+    } catch (error) {
+      setError('Error fetching transactions');
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchTransactions = () => {
-    // Simula a recuperação das transações do armazenamento local
-    const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-    setTransactions(storedTransactions);
+  const addTransaction = async (transaction: TransactionTemplate) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.post(API_BASE_URL, transaction);
+      await fetchTransactions();
+    } catch (error) {
+      setError('Error adding transaction');
+      console.error('Error adding transaction:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addTransaction = (transaction: TransactionTemplate) => {
-    const updatedTransactions = [...transactions, transaction];
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
+  const updateTransaction = async (transaction: TransactionTemplate) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.put(`${API_BASE_URL}/${transaction.id}`, transaction);
+      await fetchTransactions();
+    } catch (error) {
+      setError('Error updating transaction');
+      console.error('Error updating transaction:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateTransaction = (updatedTransaction: TransactionTemplate) => {
-    const updatedTransactions = transactions.map(transaction =>
-      transaction.id === updatedTransaction.id ? updatedTransaction : transaction
-    );
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
-  };
-
-  const deleteTransaction = (id: number) => {
-    const updatedTransactions = transactions.filter(transaction => transaction.id !== id);
-    setTransactions(updatedTransactions);
-    saveToLocalStorage(updatedTransactions);
+  const deleteTransaction = async (id: string) => { 
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.delete(`${API_BASE_URL}/${id}`);
+      await fetchTransactions(); 
+    } catch (error) {
+      setError('Error deleting transaction');
+      console.error('Error deleting transaction:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -43,5 +71,7 @@ export function useTransaction() {
     updateTransaction,
     deleteTransaction,
     fetchTransactions,
+    loading,
+    error,
   };
 }

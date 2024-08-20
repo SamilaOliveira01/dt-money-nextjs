@@ -1,35 +1,29 @@
-// src/pages/api/transactions.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Exemplo de um banco de dados em memória
-let transactions: TransactionTemplate[] = [];
-
-// Tipo para as transações
 export interface TransactionTemplate {
-  id: number;
+  id: string;
   title: string;
-  amount: number;
+  price: number;
   category: string;
   date: string;
   type: 'entrada' | 'saida';
 }
 
+let transactions: TransactionTemplate[] = [];
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
-      // Retorna todas as transações
       res.status(200).json(transactions);
       break;
 
     case 'POST':
-      // Adiciona uma nova transação
       const newTransaction: TransactionTemplate = req.body;
       transactions.push(newTransaction);
       res.status(201).json(newTransaction);
       break;
 
     case 'PUT':
-      // Atualiza uma transação existente
       const updatedTransaction: TransactionTemplate = req.body;
       transactions = transactions.map(t =>
         t.id === updatedTransaction.id ? updatedTransaction : t
@@ -38,10 +32,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       break;
 
     case 'DELETE':
-      // Remove uma transação pelo ID
       const { id } = req.query;
-      transactions = transactions.filter(t => t.id !== Number(id));
-      res.status(204).end();
+      if (typeof id === 'string') {
+        transactions = transactions.filter(t => t.id !== id);
+        res.status(204).end();
+      } else {
+        res.status(400).json({ error: 'ID inválido' });
+      }
       break;
 
     default:
