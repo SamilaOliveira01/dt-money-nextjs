@@ -1,3 +1,4 @@
+// components/Header.tsx
 import Image from "next/image";
 import React from "react";
 
@@ -26,3 +27,5 @@ export function Header({ onOpenModal }: HeaderProps) {
     </header>
   );
 }
+
+export default Header;

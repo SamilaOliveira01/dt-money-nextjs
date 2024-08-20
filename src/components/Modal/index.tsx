@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
+// src/components/Modal/index.tsx
+import React, { useState, useEffect } from 'react';
+import { TransactionTemplate } from '../TransactionTable';
 
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (transaction: TransactionTemplate) => void;
+  initialData?: TransactionTemplate | null;
 }
 
-export interface TransactionTemplate {
-  id: number;
-  title: string;
-  amount: number;
-  category: string;
-  date: string;
-  type: 'entrada' | 'saida'; 
-}
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [amount, setAmount] = useState<number | ''>(initialData?.amount || '');
+  const [category, setCategory] = useState(initialData?.category || '');
+  const [selected, setSelected] = useState<'entrada' | 'saida' | null>(initialData?.type || null);
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState<number | ''>('');
-  const [category, setCategory] = useState('');
-  const [selected, setSelected] = useState<'entrada' | 'saida' | null>(null); 
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setAmount(initialData.amount);
+      setCategory(initialData.category);
+      setSelected(initialData.type);
+    }
+  }, [initialData]);
 
   if (!isOpen) return null;
 
@@ -28,15 +31,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
 
     if (!title || amount === '' || !category || !selected) return;
 
-    const today = new Date();
-    const date = today.toLocaleDateString('pt-BR');
-
     const newTransaction: TransactionTemplate = {
-      id: new Date().getTime(),
+      id: initialData?.id || new Date().getTime(),
       title,
       amount,
       category,
-      date,
+      date: new Date().toLocaleDateString('pt-BR'),
       type: selected
     };
 
@@ -56,7 +56,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
             <button onClick={onClose} className="absolute right-4 top-4">
               &times;
             </button>
-            <h1 className="text-xl font-semibold leading-6 text-title px-3">Cadastrar transação</h1>
+            <h1 className="text-xl font-semibold leading-6 text-title px-3">
+              {initialData ? 'Editar Transação' : 'Cadastrar Transação'}
+            </h1>
             <form className="mt-7 space-y-4 px-3" onSubmit={handleSubmit}>
               <div className="mb-4">
                 <input
@@ -111,7 +113,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
                 type="submit"
                 className="w-full rounded-md text-white bg-submit px-3 h-16 py-2 text-sm font-medium hover:bg-gray-500"
               >
-                Cadastrar
+                {initialData ? 'Atualizar' : 'Cadastrar'}
               </button>
             </form>
           </div>
@@ -122,4 +124,3 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit }) => {
 };
 
 export default Modal;
-

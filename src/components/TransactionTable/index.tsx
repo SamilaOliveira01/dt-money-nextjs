@@ -1,9 +1,5 @@
 import React from 'react';
 
-interface TransactionTableProps {
-  transactions: TransactionTemplate[];
-}
-
 export interface TransactionTemplate {
   id: number;
   title: string;
@@ -13,7 +9,13 @@ export interface TransactionTemplate {
   type: 'entrada' | 'saida'; 
 }
 
-const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => {
+interface TransactionTableProps {
+  transactions: TransactionTemplate[];
+  onEdit: (transaction: TransactionTemplate) => void;
+  onDelete: (id: number) => void;
+}
+
+const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto mx-auto max-w-[1120px] pt-8">
       <table className="w-full min-w-max">
@@ -23,6 +25,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => 
             <th className="text-gray-400 text-left px-8 py-4 font-light">Preço</th>
             <th className="text-gray-400 text-left px-8 py-4 font-light">Categoria</th>
             <th className="text-gray-400 text-left px-8 py-4 font-light">Data</th>
+            <th className="text-gray-400 text-left px-8 py-4 font-light">Ações</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y-8 divide-background">
@@ -37,6 +40,20 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => 
               </td>
               <td className="px-8 py-4 text-gray-400">{transaction.category}</td>
               <td className="px-8 py-4 text-gray-400">{transaction.date}</td>
+              <td className="px-8 py-4">
+                <button
+                  onClick={() => onEdit(transaction)}
+                  className="text-blue-500 hover:underline"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => onDelete(transaction.id)}
+                  className="ml-4 text-red-500 hover:underline"
+                >
+                  Excluir
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

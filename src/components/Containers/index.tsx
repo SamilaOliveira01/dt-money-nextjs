@@ -4,7 +4,7 @@ export interface ContainerTemplate {
     id: number;
     icon: string;
     title: string;
-    amount: number; 
+    amount: number;
     backgroundColor: string;
     textColor: string;
 }
@@ -14,16 +14,17 @@ export interface ContainerProps {
 }
 
 const Container: React.FC<ContainerProps> = ({ container }) => {
-    
     const formattedValue = container.amount.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL'
     });
 
     return (
-        <div className={`w-[352px] h-[136px] rounded-md px-8 pt-6 ${container.backgroundColor}`} >
+        <div className={`w-[352px] h-[136px] rounded-md px-8 pt-6 ${container.backgroundColor}`}>
             <div className='flex justify-between'>
-                <div className={`${container.textColor}`}>{container.title}</div>
+                <div className={`${container.textColor} text-xl font-semibold`}>
+                    {container.title}
+                </div>
                 <img src={container.icon} alt="Ícone" width={32} height={32} />
             </div>
             <div className={`${container.textColor} font-medium pt-4 text-3xl`}>

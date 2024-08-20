@@ -1,27 +1,45 @@
-"use client";
-
-import React, { useState } from 'react';
+'use client';
+import React, { useState, useEffect } from 'react';
 import Container, { ContainerTemplate } from "@/components/Containers";
 import { Header } from "@/components/Header";
-import TransactionTable, { TransactionTemplate } from "@/components/TransactionTable";
+import TransactionTable from "@/components/TransactionTable";
+import { TransactionTemplate } from '@/components/TransactionTable';
 import Modal from '@/components/Modal';
-
-const initialTransactions: TransactionTemplate[] = [
-  { id: 1, title: 'Desenvolvimento de site', amount: 12000, category: 'Venda', date: '13/04/2021', type: 'entrada' },
-  { id: 2, title: 'Hamburguer', amount: 59, category: 'Alimentação', date: '10/04/2021', type: 'saida' },
-  { id: 3, title: 'Aluguel do apartamento', amount: 1200, category: 'Casa', date: '27/03/2021', type: 'saida' },
-  { id: 4, title: 'Computador', amount: 5400, category: 'Venda', date: '15/03/2021', type: 'entrada' },
-];
+import { useTransaction } from '@/hooks/useTransaction';
 
 export default function Home() {
-  const [transactions, setTransactions] = useState<TransactionTemplate[]>(initialTransactions);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    transactions,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    fetchTransactions
+  } = useTransaction();
 
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTransaction, setCurrentTransaction] = useState<TransactionTemplate | null>(null);
+
+  useEffect(() => {
+    fetchTransactions(); // Fetch transactions on component mount
+  }, [fetchTransactions]);
+
+  const handleOpenModal = (transaction?: TransactionTemplate) => {
+    setCurrentTransaction(transaction || null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentTransaction(null);
+  };
 
   const handleAddTransaction = (transaction: TransactionTemplate) => {
-    setTransactions(prevTransactions => [...prevTransactions, transaction]);
+    if (currentTransaction) {
+      updateTransaction(transaction);
+    } else {
+      addTransaction(transaction);
+    }
+    handleCloseModal();
   };
 
   const calculateTotals = () => {
@@ -73,14 +91,23 @@ export default function Home() {
 
   return (
     <>
-      <Header onOpenModal={handleOpenModal} />
+      <Header onOpenModal={() => handleOpenModal()} />
       <div className="mx-auto max-w-[1120px] flex justify-between -mt-24 pt-8">
         {containers.map((container) => (
           <Container key={container.id} container={container} />
         ))}
       </div>
-      <TransactionTable transactions={transactions} />
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleAddTransaction} />
+      <TransactionTable
+        transactions={transactions}
+        onEdit={handleOpenModal}
+        onDelete={deleteTransaction}
+      />
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleAddTransaction}
+        initialData={currentTransaction}
+      />
     </>
   );
 }
